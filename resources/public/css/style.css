@@ -1,0 +1,9 @@
+
+.badge-unread {
+  margin-left: 10px;
+  background-color: #D5DAE3;
+}
+
+.badge-unread.high {
+  color: #f00;
+}
