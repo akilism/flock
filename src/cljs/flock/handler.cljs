@@ -18,6 +18,12 @@
     (= :feed type) (str "/feeds/" id)
     :else "/"))
 
+(defn get-feeds []
+  (go (let [url (build-api-url :feeds 0)
+            response (<! (http/get url))
+            body (:body response)]
+        (:body response))))
+
 (defn get-feed
   [id]
     (go (let [url (build-api-url :feed id)

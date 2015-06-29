@@ -1,7 +1,10 @@
 (ns ^:figwheel-always flock.front-core
+    (:require-macros [cljs.core.async.macros :refer [go]])
     (:require [om.core :as om :include-macros true]
               [om.dom :as dom :include-macros true]
-              [flock.front-feed :as feed]))
+              [flock.front-feed :as feed]
+              [flock.front-handler :as handler]
+              [cljs.core.async :refer [<!] :as async]))
 
 (enable-console-print!)
 
@@ -10,16 +13,17 @@
 ;; define your app data so that it doesn't get over-written on reload
 
 (defonce app-state (atom {:active-feed 0
-                          :active-name " "
-                          :feeds [{:name "Cool Tools" :id 1 :url "http://kk.org/cooltools/feed" :unread 10}
-                                  {:name "Ridge" :id 2 :url "http://one9638.blog79.fc2.com/?xml" :unread 40}
-                                  {:name "Jason Kottke" :id 3 :url "http://feeds.kottke.org/main" :unread 30}
-                                  {:name "Kewl Tools" :id 4 :url "http://kk.org/cooltools/feed" :unread 20}]}))
+                          :active-name ""
+                          :feeds []}))
 
-(om/root
-  feed/feed-list-view
-  app-state
-  {:target (. js/document (getElementById "app"))})
+(go
+  (let [{:keys [feeds]} (<! (handler/get-feeds))]
+    (swap! app-state assoc :feeds feeds)
+    (om/root
+      feed/feed-list-view
+      app-state
+      {:target (. js/document (getElementById "app"))})))
+
 
 (defn on-js-reload []
   ;; optionally touch your app-state to force rerendering depending on

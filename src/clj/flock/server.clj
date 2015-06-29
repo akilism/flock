@@ -21,7 +21,7 @@
   (resources "/")
   (resources "/react" {:root "react"})
   (GET "/api/feeds" req (rr/response (feed/fetch-feeds req)))
-  (GET "/api/feeds/:id{[0-9]+}" [id :as req] (rr/response (feed/fetch-feed-data id req)))
+  (GET "/api/feeds/:id{[0-9]+}" [id :as req] (rr/response (feed/fetch-feed id req)))
   (GET "/*" req (clojure.string/join "" (page))))
 
 (def http-handler

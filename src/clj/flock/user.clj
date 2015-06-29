@@ -45,9 +45,9 @@
   (let [user (data-access/get-user-by-id id)]
     (is-authentic auth-token user :token)))
 
-(defn add-feed [feed id auth-token]
-  (let [result (get-user id auth-token)]
-    (cond
-      (:error result) (error/auth result)
-      :else (data-access/add-feed result feed))))
+; (defn add-feed [feed id auth-token]
+;   (let [result (get-user id auth-token)]
+;     (cond
+;       (:error result) (error/auth result)
+;       :else (data-access/add-feed result feed))))
 

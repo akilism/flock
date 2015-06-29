@@ -9,6 +9,7 @@
   :test-paths ["spec/clj"]
 
   :dependencies [[org.clojure/clojure "1.6.0"]
+                 [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [org.clojure/clojurescript "0.0-2511" :scope "provided"]
                  [ring "1.3.2"]
                  [ring/ring-defaults "0.1.3"]
@@ -20,7 +21,9 @@
                  [com.ashafa/clutch "0.4.0"]
                  [org.clojure/data.xml "0.0.8"]
                  [cljs-http "0.1.35"]
-                 [http-kit "2.0.0"]]
+                 [clj-http "1.1.2"]
+                 [http-kit "2.0.0"]
+                 [jayq "2.5.4"]]
 
   :plugins [[lein-cljsbuild "1.0.3"]
             [lein-environ "1.0.0"]]
