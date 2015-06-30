@@ -55,9 +55,13 @@
   ;(save-views)
   (map create-feed (map add-feed-db-fields feeds)))
 
-(defn fetch-feeds [feed-names]
+(defn get-feeds [feed-names]
   (clutch/with-db feeds-db
     (clutch/all-documents {:include_docs true})))
+
+(defn get-feed-by-id [feed-id]
+  (clutch/with-db feeds-db
+    (clutch/get-document feed-id)))
 
 (defn get-feeds-by-user [user-feed-ids]
   )

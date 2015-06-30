@@ -59,7 +59,7 @@
 
 (defn get-id
   [feed transform-feeds]
-  (:_id (first (filter #(= (:xmlUrl feed) (:feedUrl %)) transform-feeds))))
+  (:id (first (filter #(= (:xmlUrl feed) (:feedUrl (:doc %))) transform-feeds))))
 
 ; need to read a type out of the request to see if we should read
 ; a supplied opml file or goto the database to fetch the users feeds.
@@ -67,30 +67,15 @@
 (defn fetch-feeds [req]
   (let [feeds (fetch-feeds-file req)
         ; transform-feeds (data-access/create-feeds (reduce get-only-feeds '() feeds))
-        transform-feeds (data-access/fetch-feeds (reduce get-only-feed-names '() feeds))
+        transform-feeds (data-access/get-feeds (reduce get-only-feed-names '() feeds))
         ]
-    (println transform-feeds)
+    ; (println transform-feeds)
     {:feeds (map (fn add-id [feed]
                    (cond
                      (= :group (:type feed)) (assoc feed :feeds (map add-id (:feeds feed)))
                      (= :feed (:type feed)) (assoc feed :id (get-id feed transform-feeds) :feedUrl (:xmlUrl feed)))
                    ) feeds)}))
 
-
-(defn fetch-feed-data [str-id req]
-  (println (str "Getting feed data for id: " str-id))
-  (let [id (bigint str-id)]
-    (cond
-    (= 1 id) {:id id :articles [1 11 111 1111 11111]}
-    (= 2 id) {:id id :articles [2 22 222 2222 22222]}
-    (= 3 id) {:id id :articles [3 33 333 3333 33333]}
-    (= 4 id) {:id id :articles [4 44 444 4444 44444]}
-    (= 5 id) {:id id :articles [5 55 555 5555 55555]})))
-
-(defn get-feed-url
-  [id]
-  (println (str "Getting feed data for id: " id))
-  (:feedUrl (first (filter #(= id (:id %)) (:feeds (fetch-feeds ""))))))
 
 ;; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ;; Generic Feed Traversal/Transformation Functions
@@ -209,18 +194,17 @@
         (:content article)))) articles)))
 
 
-(defn fetch-feed [str-id req]
+(defn fetch-feed [id req]
     (println "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    (let [id (bigint str-id)
-          feed-data (data-access/get-source-feed-data (get-feed-url id))]
-       (let [feed-type (:tag feed-data)
-             feed-details (get-feed-detail feed-type feed-data)
-             ; feed-details (get-rss-feed-details (get-rss-feed-content feed-data))
-             ; article-details (get-rss-feed-articles-details (get-rss-feed-articles feed-data))
-             article-details (get-articles feed-type feed-data)]
-          ; (println "**" feed-type "**")
-          ; (pp/pprint feed-details)
-          (pp/pprint article-details)
-          {:id id
-           :feed feed-details
-           :articles article-details})))
+    (let [feed (data-access/get-feed-by-id id)
+          feed-data (data-access/get-source-feed-data (:feedUrl feed))
+          feed-type (:tag feed-data)
+          feed-details (get-feed-detail feed-type feed-data)
+          article-details (get-articles feed-type feed-data)]
+            (println "**" feed-type "**")
+            (pp/pprint feed)
+            (println "articles: " (count article-details))
+            ; (pp/pprint article-details)
+            {:id id
+             :feed feed
+             :articles article-details}))

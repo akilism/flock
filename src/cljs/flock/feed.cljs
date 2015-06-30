@@ -35,20 +35,31 @@
     (render [this]
       (badge-display unread))))
 
+
+
 (defn set-articles
-  "Loop over the feeds and assoc the new articles collection to the matching feed."
+  "Map over the feeds and assoc the new articles collection to the matching feed."
   [feeds {:keys [id articles]}]
-  (loop [fs feeds acc []]
-    (cond
-      (= 0 (count fs)) (vec acc)
-      (= (parseInt id 10) (:id (first fs)))
-        (recur (rest fs) (conj acc (assoc (first fs) :articles articles)))
-      :else (recur (rest fs) (conj acc (first fs))))))
+  ;(println feeds)
+  (map (fn check-feed [feed]
+         (cond
+           (:feeds feed) (assoc feed :feeds (map #(check-feed %) (:feeds feed)))
+           (= id (:id feed)) (assoc feed :articles articles)
+           :else feed)) feeds))
+
+(defn get-feed-by-id
+  "Gets the feed from the supplied sequence of feeds by the supplied id."
+  [id feeds]
+  (let [matching-feeds (mapcat (fn check-feed [feed]
+         (cond
+           (:feeds feed) (map #(check-feed %) (:feeds feed))
+           (= id (:id feed)) feed)) feeds)]
+    (first (filter seq matching-feeds))))
 
 (defn get-active-feed
   "Find and return the current active feed."
   [active-feed feeds]
-  (first (filter #(= active-feed (parseInt (:id %) 10)) feeds)))
+  (first (filter #(= active-feed (:id %)) feeds)))
 
 (defn toggle-group
   [evt group]
@@ -71,9 +82,9 @@
   (reify
     om/IRenderState
     (render-state [this {:keys [get-articles]}]
-       (println "feed:" feed)
+      ; (println "feed:" feed)
       (dom/li #js {:className "feed"}
-        (dom/a #js {:onClick  #(put! get-articles @feed)} (feed-display feed))
+        (dom/a #js {:onClick  #(put! get-articles (:id feed))} (feed-display feed))
         (om/build feed-unread (:unread feed))))))
 
 ; A feed group
@@ -82,7 +93,7 @@
   (reify
     om/IRenderState
     (render-state [this {:keys [get-articles]}]
-      ;(println "feed group:" group)
+      ; (println "feed group:" group)
       (dom/div nil
         (dom/p #js {:className "group open" :onClick #(toggle-group % (:title group))} (:title group))
         (apply dom/ul #js {:className "feed-list"}
@@ -101,10 +112,10 @@
     (will-mount [_]
       (let [get-articles (om/get-state owner :get-articles)]
         (go (loop []
-          (let [feed (<! get-articles)]
+          (let [feed-id (<! get-articles)]
             (go
-              (let [articles (<! (handler/get-feed (:id feed)))]
-                (om/transact! data :active-feed (fn [_] (parseInt (:id articles) 10)))
+              (let [articles (<! (handler/get-feed feed-id))]
+                (om/transact! data :active-feed (fn [_] (:id articles)))
                 (om/transact! data :feeds #(set-articles % articles))))
             (recur))))))
     om/IRenderState
@@ -114,4 +125,4 @@
           (apply dom/ul #js {:className "group-list"}
             (om/build-all feed-view (:feeds data)
               {:init-state {:get-articles get-articles}})))
-        (om/build article/article-list-view (get-active-feed (:active-feed data) (:feeds data)))))))
+        (om/build article/article-list-view (get-feed-by-id  (:active-feed data) (:feeds data)))))))

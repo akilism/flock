@@ -12,7 +12,7 @@
 
 ;; define your app data so that it doesn't get over-written on reload
 
-(defonce app-state (atom {:active-feed 0
+(defonce app-state (atom {:active-feed ""
                           :active-name ""
                           :feeds []}))
 
