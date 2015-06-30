@@ -14,6 +14,12 @@
         (dom/li nil "date")
       ))))
 
+(defn get-content
+  [article]
+  (cond
+    (:description article) (:description article)
+    :else (:content article)))
+
 (defn article-display
   [article owner]
   (reify
@@ -24,7 +30,7 @@
         (dom/p #js {:className "article-pub-date"} (:pubDate article))
         (dom/p #js {:className "article-creator"} (:creator article))
         (dom/p #js {:className "article-category"} (:category article))
-        (dom/p #js {:className "article-description"} (:description article))
+        (dom/div #js {:className "article-description" :dangerouslySetInnerHTML #js {:__html (get-content article)}})
       ;(om/build nil list-nav (article))
       ;(dom/span nil article)
       ))))
@@ -34,7 +40,7 @@
   (reify
     om/IRender
     (render [this]
-      ;(println "article-list-item: " article)
+      (println "article-list-item: " article)
       (om/build article-display article))))
 
 (defn article-list-view
@@ -42,7 +48,7 @@
   (reify
     om/IRender
     (render [this]
-;;      (println "article-list-view: " data)
+      ;(println "article-list-view: " data)
       (dom/div #js {:className "articles"}
         (dom/h2 #js {:className "feed-title"} (:name data))
         (apply dom/ul #js {:className "article-list"}

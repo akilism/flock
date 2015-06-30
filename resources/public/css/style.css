@@ -29,6 +29,9 @@
 .feeds {
   display: inline-block;
   flex: 1; }
+  .feeds .group-list {
+    overflow-y: auto;
+    overflow-x: auto; }
 
 .group {
   margin-bottom: 0;
@@ -59,7 +62,8 @@
 
 .articles {
   display: inline-block;
-  flex: 3; }
+  flex: 2 4;
+  padding-left: 25px; }
 
 h2.feed-title {
   margin-top: 0; }
@@ -73,12 +77,11 @@ h2.feed-title {
   padding-bottom: 15px;
   border-bottom: 1px solid #CECECE;
   width: 75%; }
-  .article p {
+  .article p, .article div {
     margin: 0;
     padding: 0; }
   .article .article-pub-date,
-  .article .article-category,
-  .article .article-description {
+  .article .article-category {
     padding-left: 5px; }
   .article .article-title {
     font-size: 1.25em;
@@ -91,3 +94,7 @@ h2.feed-title {
     display: inline-block;
     margin-left: 5px;
     font-size: .85em; }
+  .article .article-description {
+    clear: both; }
+    .article .article-description img {
+      max-width: 100%; }
