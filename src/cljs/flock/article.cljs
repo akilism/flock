@@ -20,6 +20,13 @@
     (:description article) (:description article)
     :else (:content article)))
 
+
+(defn parseInt [str-n x]
+  (.parseInt js/Number str-n x))
+
+(defn get-height []
+  (str (- (parseInt (.-availHeight js/screen) 10) 125) "px"))
+
 (defn article-display
   [article owner]
   (reify
@@ -49,7 +56,10 @@
     om/IRender
     (render [this]
       ;(println "article-list-view: " data)
-      (dom/div #js {:className "articles"}
+      (dom/div #js {:className "articles" :style #js {:height (get-height)}}
         (dom/h2 #js {:className "feed-title"} (:name data))
         (apply dom/ul #js {:className "article-list"}
           (om/build-all article-list-item (:articles data)))))))
+
+
+;{:height (.-availHeight js/screen)}

@@ -23,7 +23,7 @@
                  [cljs-http "0.1.35"]
                  [clj-http "1.1.2"]
                  [http-kit "2.0.0"]
-                 [jayq "2.5.4"]]
+                 [buddy/buddy-hashers "0.6.0"]]
 
   :plugins [[lein-cljsbuild "1.0.3"]
             [lein-environ "1.0.0"]]

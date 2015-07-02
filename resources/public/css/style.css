@@ -28,10 +28,8 @@
 
 .feeds {
   display: inline-block;
-  flex: 1; }
-  .feeds .group-list {
-    overflow-y: auto;
-    overflow-x: auto; }
+  flex: 1;
+  overflow-y: auto; }
 
 .group {
   margin-bottom: 0;
@@ -63,7 +61,8 @@
 .articles {
   display: inline-block;
   flex: 2 4;
-  padding-left: 25px; }
+  padding-left: 25px;
+  overflow-y: auto; }
 
 h2.feed-title {
   margin-top: 0; }

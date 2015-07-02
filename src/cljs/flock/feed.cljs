@@ -101,6 +101,9 @@
               {:init-state {:get-articles get-articles}}))))))
 
 
+(defn get-height []
+  (str (- (parseInt (.-availHeight js/screen) 10) 125) "px"))
+
 (defn feed-list-view
   "The feed list"
   [data owner]
@@ -121,8 +124,10 @@
     om/IRenderState
     (render-state [this {:keys [get-articles]}]
       (dom/div #js {:className "content"}
-        (dom/div #js {:className "feeds"}
+        (dom/div #js {:className "feeds" :style #js {:height (get-height)}}
           (apply dom/ul #js {:className "group-list"}
             (om/build-all feed-view (:feeds data)
               {:init-state {:get-articles get-articles}})))
         (om/build article/article-list-view (get-feed-by-id  (:active-feed data) (:feeds data)))))))
+
+;:height

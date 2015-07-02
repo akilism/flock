@@ -4,43 +4,76 @@
             [clojure.data.xml :as xml]
             [clojure.java.io :as io]))
 
-
+; ~~~~~~~~~~~~~~~~~~~~~
+; Define the databases.
+; ~~~~~~~~~~~~~~~~~~~~~
 (def users-db "http://localhost:5984/flock-users")
 (def feeds-db "http://localhost:5984/flock-feeds")
+
+
+; ~~~~~~~~~~~~~~~~~~~~~
+; Bootstrap some views.
+; ~~~~~~~~~~~~~~~~~~~~~
 
 (defn save-views []
   (clutch/with-db feeds-db
     (clutch/save-view "feeds"
       (clutch/view-server-fns :cljs
-        {:by-id {:map (fn [doc]
-                        (js/emit (aget doc "id") doc))}}))
-    (clutch/save-view "feeds"
-      (clutch/view-server-fns :cljs
         {:by-title-name {:map (fn [doc]
                         (js/emit (aget doc "title") doc)
-                        (js/emit (aget doc "name") doc))}})))
-  (clutch/with-db users-db
-    (clutch/save-view "users"
+                        (js/emit (aget doc "name") doc))}}))
+    (clutch/save-view "feeds"
       (clutch/view-server-fns :cljs
-        {:by-id {:map (fn [doc]
-                        (js/emit (aget doc "id") doc))}}))
+        {:by-feed-url {:map (fn [doc]
+                        (js/emit (aget doc "feedUrl") doc))}})))
+  (clutch/with-db users-db
     (clutch/save-view "users"
       (clutch/view-server-fns :cljs
         {:by-email {:map (fn [doc]
                         (js/emit (aget doc "email") doc))}}))))
 
-(defn get-user-by-id [id])
 
-(defn get-user-by-email [email])
+; ~~~~~~~~~~~~~~~~~~~~
+; Getting Data Doggies
+; ~~~~~~~~~~~~~~~~~~~~
+
+(defn get-user-by-id [user-id]
+  (clutch/with-db users-db
+    (clutch/get-document user-id)))
+
+(defn get-user-by-email [email]
+  (clutch/with-db users-db
+    (clutch/get-view "users" "by-email" {:key feed-name})))
+
+(defn get-feeds [feed-names]
+  ; (save-views)
+  (clutch/with-db feeds-db
+    (clutch/all-documents {:include_docs true})))
+
+(defn get-feed-by-id [feed-id]
+  (clutch/with-db feeds-db
+    (clutch/get-document feed-id)))
+
+(defn get-feed-by-name [feed-name]
+  (clutch/with-db feeds-db
+    (clutch/get-view "feeds" "by-id" {:key feed-name})))
+
+(defn get-feeds-by-user [user-id]
+  (:feeds (get-user-by-id user-id)))
 
 (defn user-exists? [id]
   (clutch/with-db users-db (clutch/document-exists? id)))
 
+
+; ~~~~~~~~~~~~~~~~~
+; Adding Data Dere.
+; ~~~~~~~~~~~~~~~~~
+
 (defn create-user [user]
   (let [result (clutch/with-db users-db (clutch/put-document user))]
-    (merge user result)))
+    (dissoc (merge user result) :passwd)))
 
-(defn save-user [user]
+(defn update-user [user]
   (clutch/with-db users-db (clutch/put-document user)))
 
 (defn create-feed [feed]
@@ -52,25 +85,11 @@
   (dissoc (assoc feed :feedUrl (:xmlUrl feed) :tags []) :xmlUrl))
 
 (defn create-feeds [feeds]
-  ;(save-views)
   (map create-feed (map add-feed-db-fields feeds)))
 
-(defn get-feeds [feed-names]
-  (clutch/with-db feeds-db
-    (clutch/all-documents {:include_docs true})))
-
-(defn get-feed-by-id [feed-id]
-  (clutch/with-db feeds-db
-    (clutch/get-document feed-id)))
-
-(defn get-feeds-by-user [user-feed-ids]
-  )
 
 (defn remove-feed [[id :id feeds :feeds :as user] feed-id]
   )
-
-(defn inc-user-id []
-  ())
 
 (defn parse-feed-xml
   [xml-data]
@@ -86,18 +105,3 @@
   [file-path]
   (with-open [reader (io/reader file-path)]
     (parse-feed-xml (clojure.string/join "\n" (line-seq reader)))))
-
-
-
-
-; (when (and (:title doc)
-;                                            (:feed-url doc)
-;                                            (:web-url doc)
-;                                            (:name doc)
-;                                            (:type doc))
-;                                   (let [tdoc {:title (:title doc)
-;                                               :feed-url (:feed-url doc)
-;                                               :web-url (:web-url doc)
-;                                               :name (:name doc)
-;                                               :type (:type doc)}]
-;                                     (js/emit tdoc nil)))

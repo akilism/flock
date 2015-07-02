@@ -37,11 +37,7 @@
 .feeds {
   display: inline-block;
   flex: 1;
-
-  .group-list {
-    overflow-y: auto;
-    overflow-x: auto;
-  }
+  overflow-y: auto;
 }
 
 .group {
@@ -93,6 +89,7 @@
   display: inline-block;
   flex: 2 4;
   padding-left: 25px;
+  overflow-y: auto;
 }
 
 h2.feed-title {

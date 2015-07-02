@@ -1,6 +1,7 @@
 (ns flock.user
   (:require [flock.data-access :as data-access]
-            [flock.error :as error]))
+            [flock.error :as error]
+            [buddy.hashers :as hashers]))
 
 ; User data structure
 ; (def user { :id (java.util.UUID/randomUUID)
@@ -34,6 +35,9 @@
     (and (= :password auth-type) (pass-auth auth-value user)) user
     (and (= :token auth-type) (token-auth auth-value user)) user
     :else {:error :invalid}))
+
+(defn create-user [[email password]]
+  (data-access/create-user {:email email :passwd (hashers/encrypt password) :feeds []}))
 
 (defn login-user [email password]
   ;;login the user using an email address and password.
